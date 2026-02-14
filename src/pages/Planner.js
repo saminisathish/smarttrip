@@ -10,7 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 
-// Fix Leaflet marker icon issue
+/* ---------- Leaflet icon fix ---------- */
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -21,7 +21,7 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Places based on interest
+/* ---------- Places data ---------- */
 const placesByInterest = {
   Temple: [
     { name: "Chamundi Temple", position: [12.2743, 76.6709] },
@@ -33,7 +33,7 @@ const placesByInterest = {
   Adventure: [{ name: "Trekking Point", position: [12.35, 76.6] }],
 };
 
-// Move map when a place is clicked
+/* ---------- Map focus helper ---------- */
 function FlyToPlace({ position }) {
   const map = useMap();
   map.setView(position, 14);
@@ -48,7 +48,7 @@ function Planner() {
   const days = Number(trip.days) || 1;
   const interests = trip.interests || [];
 
-  // Build itinerary dynamically
+  /* ---------- Build itinerary ---------- */
   const itinerary = Array.from({ length: days }, (_, i) => ({
     day: i + 1,
     places:
@@ -57,7 +57,7 @@ function Planner() {
 
   const [selectedPlace, setSelectedPlace] = useState(null);
 
-  // Route coordinates
+  /* ---------- Route line positions ---------- */
   const routePositions = useMemo(() => {
     return itinerary.flatMap((day) =>
       day.places.map((p) => p.position)
@@ -98,12 +98,27 @@ function Planner() {
             </div>
           ))}
 
-          {/* START LIVE NAVIGATION BUTTON */}
+          {/* START LIVE NAVIGATION */}
           <button
             style={styles.navButton}
             onClick={() => navigate("/navigation")}
           >
             Start Live Navigation
+          </button>
+
+          {/* EXPORT TRIP SUMMARY */}
+          <button
+            style={styles.exportButton}
+            onClick={() =>
+              navigate("/export", {
+                state: {
+                  ...trip,
+                  itinerary,
+                },
+              })
+            }
+          >
+            Export Trip Summary
           </button>
         </div>
 
@@ -144,6 +159,7 @@ function Planner() {
   );
 }
 
+/* ---------- Styles ---------- */
 const styles = {
   container: {
     minHeight: "100vh",
@@ -176,6 +192,17 @@ const styles = {
     padding: "12px",
     width: "100%",
     backgroundColor: "#16a34a",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+  exportButton: {
+    marginTop: "10px",
+    padding: "12px",
+    width: "100%",
+    backgroundColor: "#2563eb",
     color: "#fff",
     border: "none",
     borderRadius: "6px",
