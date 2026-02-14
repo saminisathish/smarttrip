@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>SmartTrip – Travel Planner</h1>
@@ -8,7 +12,11 @@ function Home() {
 
         <input style={styles.input} placeholder="Start Location" />
         <input style={styles.input} placeholder="Destination" />
-        <input style={styles.input} type="number" placeholder="Number of Days" />
+        <input
+          style={styles.input}
+          type="number"
+          placeholder="Number of Days"
+        />
 
         <div style={styles.checkboxGroup}>
           <label><input type="checkbox" /> Temple</label>
@@ -23,7 +31,12 @@ function Home() {
           <option>Drive</option>
         </select>
 
-        <button style={styles.button}>Generate Itinerary</button>
+        <button
+          style={styles.button}
+          onClick={() => navigate("/planner")}
+        >
+          Generate Itinerary
+        </button>
       </div>
     </div>
   );
