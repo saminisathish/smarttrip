@@ -1,7 +1,8 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
-// Fix marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -12,21 +13,72 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+const placesByInterest = {
+  Temple: [
+    { name: "Chamundi Temple", position: [12.2743, 76.6709] },
+  ],
+  Nature: [
+    { name: "Brindavan Gardens", position: [12.4217, 76.5728] },
+  ],
+  Food: [
+    { name: "Local Market", position: [12.297, 76.639] },
+  ],
+  Adventure: [
+    { name: "Trekking Point", position: [12.35, 76.6] },
+  ],
+};
+
+function FlyToPlace({ position }) {
+  const map = useMap();
+  map.setView(position, 14);
+  return null;
+}
+
 function Planner() {
+  const location = useLocation();
+  const trip = location.state;
+
+  const days = trip?.days || 1;
+  const interests = trip?.interests || [];
+
+  const itinerary = Array.from({ length: days }, (_, i) => ({
+    day: i + 1,
+    places:
+      placesByInterest[interests[i % interests.length]] || [],
+  }));
+
+  const [selectedPlace, setSelectedPlace] = useState(null);
+
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Your Trip Plan</h1>
+      <h1 style={styles.title}>
+        Trip to {trip?.destination || "Your Destination"}
+      </h1>
 
       <div style={styles.layout}>
-        {/* Left: Itinerary */}
+        {/* ITINERARY */}
         <div style={styles.panel}>
           <h2>Itinerary</h2>
-          <p>Day 1 – Chamundi Temple</p>
-          <p>Day 2 – Mysuru Palace</p>
-          <p>Day 3 – Brindavan Gardens</p>
+
+          {itinerary.map((day) => (
+            <div key={day.day}>
+              <h3>Day {day.day}</h3>
+              <ul>
+                {day.places.map((place) => (
+                  <li
+                    key={place.name}
+                    style={styles.placeItem}
+                    onClick={() => setSelectedPlace(place)}
+                  >
+                    {place.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Right: Map */}
+        {/* MAP */}
         <div style={styles.panel}>
           <h2>Map View</h2>
 
@@ -40,9 +92,17 @@ function Planner() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Marker position={[12.2958, 76.6394]}>
-              <Popup>Mysuru</Popup>
-            </Marker>
+            {itinerary.flatMap((day) =>
+              day.places.map((place) => (
+                <Marker key={place.name} position={place.position}>
+                  <Popup>{place.name}</Popup>
+                </Marker>
+              ))
+            )}
+
+            {selectedPlace && (
+              <FlyToPlace position={selectedPlace.position} />
+            )}
           </MapContainer>
         </div>
       </div>
@@ -71,6 +131,11 @@ const styles = {
     borderRadius: "10px",
     flex: 1,
     boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+  },
+  placeItem: {
+    cursor: "pointer",
+    color: "#2563eb",
+    marginBottom: "5px",
   },
 };
 
