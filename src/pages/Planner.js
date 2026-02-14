@@ -1,6 +1,13 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useState, useMemo } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -20,12 +27,8 @@ const placesByInterest = {
   Nature: [
     { name: "Brindavan Gardens", position: [12.4217, 76.5728] },
   ],
-  Food: [
-    { name: "Local Market", position: [12.297, 76.639] },
-  ],
-  Adventure: [
-    { name: "Trekking Point", position: [12.35, 76.6] },
-  ],
+  Food: [{ name: "Local Market", position: [12.297, 76.639] }],
+  Adventure: [{ name: "Trekking Point", position: [12.35, 76.6] }],
 };
 
 function FlyToPlace({ position }) {
@@ -35,12 +38,13 @@ function FlyToPlace({ position }) {
 }
 
 function Planner() {
-  const location = useLocation();
-  const trip = location.state;
+  const { state } = useLocation();
+  const trip = state || {};
 
-  const days = trip?.days || 1;
-  const interests = trip?.interests || [];
+  const days = Number(trip.days) || 1;
+  const interests = trip.interests || [];
 
+  // Build itinerary
   const itinerary = Array.from({ length: days }, (_, i) => ({
     day: i + 1,
     places:
@@ -49,26 +53,39 @@ function Planner() {
 
   const [selectedPlace, setSelectedPlace] = useState(null);
 
+  // Collect all coordinates for route line
+  const routePositions = useMemo(() => {
+    return itinerary.flatMap((day) =>
+      day.places.map((p) => p.position)
+    );
+  }, [itinerary]);
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>
-        Trip to {trip?.destination || "Your Destination"}
+        Trip to {trip.destination || "Your Destination"}
       </h1>
 
       <div style={styles.layout}>
-        {/* ITINERARY */}
+        {/* LEFT – ITINERARY */}
         <div style={styles.panel}>
           <h2>Itinerary</h2>
 
           {itinerary.map((day) => (
-            <div key={day.day}>
+            <div key={day.day} style={{ marginBottom: "15px" }}>
               <h3>Day {day.day}</h3>
               <ul>
                 {day.places.map((place) => (
                   <li
                     key={place.name}
-                    style={styles.placeItem}
                     onClick={() => setSelectedPlace(place)}
+                    style={{
+                      ...styles.placeItem,
+                      fontWeight:
+                        selectedPlace?.name === place.name
+                          ? "bold"
+                          : "normal",
+                    }}
                   >
                     {place.name}
                   </li>
@@ -78,7 +95,7 @@ function Planner() {
           ))}
         </div>
 
-        {/* MAP */}
+        {/* RIGHT – MAP */}
         <div style={styles.panel}>
           <h2>Map View</h2>
 
@@ -92,14 +109,22 @@ function Planner() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {itinerary.flatMap((day) =>
-              day.places.map((place) => (
-                <Marker key={place.name} position={place.position}>
-                  <Popup>{place.name}</Popup>
-                </Marker>
-              ))
+            {/* Route line */}
+            {routePositions.length > 1 && (
+              <Polyline
+                positions={routePositions}
+                color="blue"
+              />
             )}
 
+            {/* Markers */}
+            {routePositions.map((pos, index) => (
+              <Marker key={index} position={pos}>
+                <Popup>Stop {index + 1}</Popup>
+              </Marker>
+            ))}
+
+            {/* Fly to selected place */}
             {selectedPlace && (
               <FlyToPlace position={selectedPlace.position} />
             )}
@@ -135,7 +160,7 @@ const styles = {
   placeItem: {
     cursor: "pointer",
     color: "#2563eb",
-    marginBottom: "5px",
+    marginBottom: "6px",
   },
 };
 
