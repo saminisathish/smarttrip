@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -57,12 +57,40 @@ function Planner() {
 
   const [selectedPlace, setSelectedPlace] = useState(null);
 
-  /* ---------- Route line positions ---------- */
+  /* ---------- Route positions ---------- */
   const routePositions = useMemo(() => {
     return itinerary.flatMap((day) =>
       day.places.map((p) => p.position)
     );
   }, [itinerary]);
+
+  /* ---------- SAVE DATA FOR ANALYTICS ---------- */
+  useEffect(() => {
+    if (!trip.destination) return;
+
+    const stored =
+      JSON.parse(localStorage.getItem("smarttrip_data")) || [];
+
+    const alreadyExists = stored.some(
+      (t) =>
+        t.destination === trip.destination &&
+        t.days === trip.days
+    );
+
+    if (!alreadyExists) {
+      stored.push({
+        destination: trip.destination,
+        days: trip.days,
+        interests: trip.interests,
+        date: new Date().toISOString(),
+      });
+
+      localStorage.setItem(
+        "smarttrip_data",
+        JSON.stringify(stored)
+      );
+    }
+  }, [trip]);
 
   return (
     <div style={styles.container}>
@@ -71,7 +99,7 @@ function Planner() {
       </h1>
 
       <div style={styles.layout}>
-        {/* LEFT PANEL – ITINERARY */}
+        {/* LEFT PANEL */}
         <div style={styles.panel}>
           <h2>Itinerary</h2>
 
@@ -98,7 +126,7 @@ function Planner() {
             </div>
           ))}
 
-          {/* START LIVE NAVIGATION */}
+          {/* LIVE NAVIGATION */}
           <button
             style={styles.navButton}
             onClick={() => navigate("/navigation")}
@@ -106,7 +134,7 @@ function Planner() {
             Start Live Navigation
           </button>
 
-          {/* EXPORT TRIP SUMMARY */}
+          {/* EXPORT */}
           <button
             style={styles.exportButton}
             onClick={() =>
@@ -119,6 +147,14 @@ function Planner() {
             }
           >
             Export Trip Summary
+          </button>
+
+          {/* ANALYTICS */}
+          <button
+            style={styles.analyticsButton}
+            onClick={() => navigate("/analytics")}
+          >
+            View Analytics Dashboard
           </button>
         </div>
 
@@ -136,19 +172,16 @@ function Planner() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* Route Line */}
             {routePositions.length > 1 && (
               <Polyline positions={routePositions} color="#2563eb" />
             )}
 
-            {/* Markers */}
             {routePositions.map((pos, index) => (
               <Marker key={index} position={pos}>
                 <Popup>Stop {index + 1}</Popup>
               </Marker>
             ))}
 
-            {/* Focus on selected place */}
             {selectedPlace && (
               <FlyToPlace position={selectedPlace.position} />
             )}
@@ -159,7 +192,7 @@ function Planner() {
   );
 }
 
-/* ---------- POLISHED STYLES ---------- */
+/* ---------- STYLES ---------- */
 const styles = {
   container: {
     minHeight: "100vh",
@@ -205,6 +238,17 @@ const styles = {
     padding: "12px",
     width: "100%",
     backgroundColor: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  analyticsButton: {
+    marginTop: "10px",
+    padding: "12px",
+    width: "100%",
+    backgroundColor: "#0f172a",
     color: "#fff",
     border: "none",
     borderRadius: "10px",
