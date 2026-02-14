@@ -25,28 +25,29 @@ function Home() {
     }));
   };
 
-  const handleSubmit = () => {
-    navigate("/planner", { state: formData });
-  };
-
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>SmartTrip – Travel Planner</h1>
+    <div style={styles.page}>
+      <div style={styles.header}>
+        <h1 style={styles.title}>SmartTrip</h1>
+        <p style={styles.subtitle}>
+          Plan smarter. Travel better.
+        </p>
+      </div>
 
       <div style={styles.card}>
-        <h2>Plan Your Trip</h2>
+        <h2 style={styles.cardTitle}>Plan Your Trip</h2>
 
         <input
           name="start"
-          style={styles.input}
           placeholder="Start Location"
+          style={styles.input}
           onChange={handleChange}
         />
 
         <input
           name="destination"
-          style={styles.input}
           placeholder="Destination"
+          style={styles.input}
           onChange={handleChange}
         />
 
@@ -54,18 +55,18 @@ function Home() {
           name="days"
           type="number"
           min="1"
-          style={styles.input}
           placeholder="Number of Days"
+          style={styles.input}
           onChange={handleChange}
         />
 
         <div style={styles.checkboxGroup}>
           {["Temple", "Nature", "Food", "Adventure"].map((item) => (
-            <label key={item}>
+            <label key={item} style={styles.checkbox}>
               <input
                 type="checkbox"
                 onChange={() => handleCheckbox(item)}
-              />{" "}
+              />
               {item}
             </label>
           ))}
@@ -80,7 +81,10 @@ function Home() {
           <option>Walk</option>
         </select>
 
-        <button style={styles.button} onClick={handleSubmit}>
+        <button
+          style={styles.primaryButton}
+          onClick={() => navigate("/planner", { state: formData })}
+        >
           Generate Itinerary
         </button>
       </div>
@@ -89,48 +93,66 @@ function Home() {
 }
 
 const styles = {
-  container: {
+  page: {
     minHeight: "100vh",
-    backgroundColor: "#f3f4f6",
+    background: "linear-gradient(135deg, #e0e7ff, #f8fafc)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    paddingTop: "40px",
+    paddingTop: "60px",
+  },
+  header: {
+    textAlign: "center",
+    marginBottom: "30px",
   },
   title: {
-    fontSize: "32px",
-    fontWeight: "bold",
-    color: "#2563eb",
-    marginBottom: "20px",
+    fontSize: "42px",
+    fontWeight: "800",
+    color: "#1e40af",
+  },
+  subtitle: {
+    color: "#475569",
+    marginTop: "6px",
   },
   card: {
     backgroundColor: "#ffffff",
     padding: "30px",
-    borderRadius: "12px",
-    width: "350px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    width: "360px",
+    borderRadius: "14px",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+  },
+  cardTitle: {
+    marginBottom: "15px",
+    fontWeight: "600",
   },
   input: {
     width: "100%",
-    padding: "10px",
-    marginBottom: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
+    padding: "12px",
+    marginBottom: "12px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5f5",
+    outline: "none",
   },
   checkboxGroup: {
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: "10px",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "8px",
+    marginBottom: "12px",
   },
-  button: {
+  checkbox: {
+    fontSize: "14px",
+    color: "#334155",
+  },
+  primaryButton: {
     width: "100%",
-    padding: "12px",
+    padding: "14px",
     backgroundColor: "#2563eb",
-    color: "#fff",
+    color: "#ffffff",
     border: "none",
-    borderRadius: "6px",
-    fontWeight: "bold",
+    borderRadius: "10px",
+    fontWeight: "700",
     cursor: "pointer",
+    marginTop: "10px",
   },
 };
 

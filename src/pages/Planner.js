@@ -129,7 +129,7 @@ function Planner() {
           <MapContainer
             center={[12.2958, 76.6394]}
             zoom={12}
-            style={{ height: "350px", width: "100%" }}
+            style={{ height: "360px", width: "100%" }}
           >
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
@@ -138,7 +138,7 @@ function Planner() {
 
             {/* Route Line */}
             {routePositions.length > 1 && (
-              <Polyline positions={routePositions} color="blue" />
+              <Polyline positions={routePositions} color="#2563eb" />
             )}
 
             {/* Markers */}
@@ -159,28 +159,30 @@ function Planner() {
   );
 }
 
-/* ---------- Styles ---------- */
+/* ---------- POLISHED STYLES ---------- */
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#f1f5f9",
     padding: "30px",
   },
   title: {
     textAlign: "center",
-    color: "#2563eb",
-    marginBottom: "20px",
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#1e40af",
+    marginBottom: "25px",
   },
   layout: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "1fr 1.2fr",
     gap: "20px",
   },
   panel: {
     backgroundColor: "#ffffff",
     padding: "20px",
-    borderRadius: "10px",
-    flex: 1,
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+    borderRadius: "14px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
   },
   placeItem: {
     cursor: "pointer",
@@ -194,9 +196,9 @@ const styles = {
     backgroundColor: "#16a34a",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "10px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "bold",
   },
   exportButton: {
     marginTop: "10px",
@@ -205,9 +207,9 @@ const styles = {
     backgroundColor: "#2563eb",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "10px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "bold",
   },
 };
 
