@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import {
   MapContainer,
@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 
+// Fix Leaflet marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -20,6 +21,7 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// Places based on interest
 const placesByInterest = {
   Temple: [
     { name: "Chamundi Temple", position: [12.2743, 76.6709] },
@@ -31,6 +33,7 @@ const placesByInterest = {
   Adventure: [{ name: "Trekking Point", position: [12.35, 76.6] }],
 };
 
+// Move map when a place is clicked
 function FlyToPlace({ position }) {
   const map = useMap();
   map.setView(position, 14);
@@ -39,12 +42,13 @@ function FlyToPlace({ position }) {
 
 function Planner() {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const trip = state || {};
 
   const days = Number(trip.days) || 1;
   const interests = trip.interests || [];
 
-  // Build itinerary
+  // Build itinerary dynamically
   const itinerary = Array.from({ length: days }, (_, i) => ({
     day: i + 1,
     places:
@@ -53,7 +57,7 @@ function Planner() {
 
   const [selectedPlace, setSelectedPlace] = useState(null);
 
-  // Collect all coordinates for route line
+  // Route coordinates
   const routePositions = useMemo(() => {
     return itinerary.flatMap((day) =>
       day.places.map((p) => p.position)
@@ -67,7 +71,7 @@ function Planner() {
       </h1>
 
       <div style={styles.layout}>
-        {/* LEFT – ITINERARY */}
+        {/* LEFT PANEL – ITINERARY */}
         <div style={styles.panel}>
           <h2>Itinerary</h2>
 
@@ -93,9 +97,17 @@ function Planner() {
               </ul>
             </div>
           ))}
+
+          {/* START LIVE NAVIGATION BUTTON */}
+          <button
+            style={styles.navButton}
+            onClick={() => navigate("/navigation")}
+          >
+            Start Live Navigation
+          </button>
         </div>
 
-        {/* RIGHT – MAP */}
+        {/* RIGHT PANEL – MAP */}
         <div style={styles.panel}>
           <h2>Map View</h2>
 
@@ -109,12 +121,9 @@ function Planner() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* Route line */}
+            {/* Route Line */}
             {routePositions.length > 1 && (
-              <Polyline
-                positions={routePositions}
-                color="blue"
-              />
+              <Polyline positions={routePositions} color="blue" />
             )}
 
             {/* Markers */}
@@ -124,7 +133,7 @@ function Planner() {
               </Marker>
             ))}
 
-            {/* Fly to selected place */}
+            {/* Focus on selected place */}
             {selectedPlace && (
               <FlyToPlace position={selectedPlace.position} />
             )}
@@ -161,6 +170,17 @@ const styles = {
     cursor: "pointer",
     color: "#2563eb",
     marginBottom: "6px",
+  },
+  navButton: {
+    marginTop: "15px",
+    padding: "12px",
+    width: "100%",
+    backgroundColor: "#16a34a",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 };
 
